@@ -1,0 +1,88 @@
+<html lang="en">
+
+<head>
+    <title>alfa | Dontpad</title>
+    <style>
+        HTML {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            margin: 0px;
+            padding: 0px;
+            background-color: #F5F5F5;
+            font-size: 12;
+            font-family: Arial, Helvetica, Tahoma, Verdana;
+            overflow: hidden;
+        }
+
+        #text-div {
+            float: right;
+            margin: 0px;
+        }
+
+        #text {
+            margin: auto;
+            font-family: Arial, Helvetica, Tahoma, Verdana;
+            font-size: 16px;
+            width: 100%;
+            height: 100%;
+            color: #111111;
+            padding: 10px;
+            resize: none;
+            overflow: auto;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="text-div" align="center" style="width: 100%; height: 100%;">
+        <textarea id="text" onchange="obj.onTextChange()"></textarea>
+    </div>
+
+    <script type="text/javascript">
+        var obj = {
+            roomName: null,
+            textArea: null,
+            sock: null,
+            load: () => {
+                obj.roomName = window.location.pathname.substring(1)
+                obj.textArea = document.getElementById("text")
+                obj.setWebSocketHandler()
+                obj.setTextAreaHandlers()
+            },
+            setTextAreaHandlers: () => {
+                obj.textArea.onkeyup = () => {
+                    obj.onTextChange()
+                };
+                // obj.textArea.change(() => {
+                //     obj.onTextChange()
+                // });
+                // obj.textArea.on('paste', () => {
+                //     obj.onTextChange()
+                // });
+            },
+            onTextChange: () => {
+                obj.sock.send(obj.textArea.value)
+            },
+            setWebSocketHandler: () => {
+                if (window["WebSocket"]) {
+                    obj.sock = new WebSocket("ws://" + document.location.host + "/ws/" + obj.roomName);
+                } else {
+                    console.log("ERROR | Your browser does not support WebSockets.")
+                    return
+                }
+                obj.sock.onmessage = (evt) => {
+                    obj.textArea.value = evt.data
+                }
+            }
+        }
+        window.onload = obj.load
+    </script>
+
+</body>
+
+</html>
